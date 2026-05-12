@@ -268,5 +268,3 @@ Estudiante 1 --- N SolicitudEspera
 - **TypeScript**
 - **Sin autenticación** en esta versión.
 - **Sin frontend** en esta versión. Solo API REST.
-
-(ISO 8601)s
