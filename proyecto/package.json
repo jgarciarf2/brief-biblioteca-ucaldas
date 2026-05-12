@@ -1,0 +1,13 @@
+{
+  "name": "biblioteca-ucaldas-api",
+  "version": "1.0.0",
+  "description": "API REST para gestionar libros y prestamos en una biblioteca universitaria",
+  "main": "app.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
