@@ -55,8 +55,8 @@ Desarrollar una API para gestionar el ciclo completo de préstamos de libros en 
 ### Entidad: Ejemplar
 
 | Campo             | Tipo                                                 | Obligatorio | Descripción                               |
-| ----------------- | ---------------------------------------------------- | ----------- | ----------------------------------------- | --- |
-| id                | string                                               | sí          | Identificador interno único del ejemplar. |     |
+| ----------------- | ---------------------------------------------------- | ----------- | ----------------------------------------- |
+| id                | string                                               | sí          | Identificador interno único del ejemplar. |
 | libro_id          | string                                               | sí          | Referencia al libro al que pertenece.     |
 | estado            | enum(`disponible`,`prestado`,`mantenimiento`,`baja`) | sí          | Estado operativo del ejemplar.            |
 | ubicacion_detalle | string                                               | no          | Estante o referencia interna.             |
@@ -109,12 +109,14 @@ Desarrollar una API para gestionar el ciclo completo de préstamos de libros en 
 
 ### Diagrama de relaciones
 
-Libro 1 --- N Ejemplar
-Estudiante 1 --- N Prestamo
-Ejemplar 1 --- N Prestamo (historico, no simultaneo)
-Prestamo 1 --- 0..1 Multa
-Libro 1 --- N SolicitudEspera
-Estudiante 1 --- N SolicitudEspera
+| Entidad Origen | Relación   | Entidad Destino | Notas                                                            |
+| -------------- | ---------- | --------------- | ---------------------------------------------------------------- |
+| Libro          | 1 --- N    | Ejemplar        | Un libro puede tener múltiples copias físicas.                   |
+| Estudiante     | 1 --- N    | Préstamo        | Un estudiante puede tener varios préstamos activos o históricos. |
+| Ejemplar       | 1 --- N    | Préstamo        | Historial de préstamos por cada copia física (no simultáneos).   |
+| Préstamo       | 1 --- 0..1 | Multa           | Una multa se origina solo si hay mora en un préstamo.            |
+| Libro          | 1 --- N    | SolicitudEspera | Un libro puede tener varios estudiantes en cola.                 |
+| Estudiante     | 1 --- N    | SolicitudEspera | Un estudiante puede esperar por varios libros.                   |
 
 ---
 
