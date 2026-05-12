@@ -54,58 +54,61 @@ Desarrollar una API para gestionar el ciclo completo de préstamos de libros en 
 
 ### Entidad: Ejemplar
 
-| Campo             | Tipo                                                 | Obligatorio |Descripción                               |
-| ----------------- | ---------------------------------------------------- | ----------- |
-| id                | string                                               | sí          | Identificador interno único del ejemplar.           |              |
-| libro_id          | string                                               | sí          | Referencia al libro al que pertenece.          |
-| estado            | enum(`disponible`,`prestado`,`mantenimiento`,`baja`) | sí          | Estado operativo del ejemplar.           |
-| ubicacion_detalle | string                                               | no          | Estante o referencia interna.            |
+| Campo             | Tipo                                                 | Obligatorio | Descripción                               |
+| ----------------- | ---------------------------------------------------- | ----------- | ----------------------------------------- | --- |
+| id                | string                                               | sí          | Identificador interno único del ejemplar. |     |
+| libro_id          | string                                               | sí          | Referencia al libro al que pertenece.     |
+| estado            | enum(`disponible`,`prestado`,`mantenimiento`,`baja`) | sí          | Estado operativo del ejemplar.            |
+| ubicacion_detalle | string                                               | no          | Estante o referencia interna.             |
 
 ### Entidad: Usuario
 
-| Campo              | Tipo                        | Obligatorio | Descripción                           |
-| ------------------ | --------------------------- | ----------- | ------------------------------------- |
-| id                 | string                      | sí          | Identificador interno del usuario.     |
-| codigo_estudiante? | string                      | sí          | Código único institucional.           |
-| nombre             | string                      | sí          | Nombre completo del usuario.          |
-| rol                | enum(`estudiante_pregrado`,`estudiante_posgrado`, `bibliotecario`) | sí    | Define límites de préstamo.            |
-| estado             | enum(`activo`,`bloqueado`, `inactivo`)  | sí | Estado general para préstamos.        |
+| Campo              | Tipo                                                               | Obligatorio | Descripción                        |
+| ------------------ | ------------------------------------------------------------------ | ----------- | ---------------------------------- |
+| id                 | string                                                             | sí          | Identificador interno del usuario. |
+| codigo_estudiante? | string                                                             | sí          | Código único institucional.        |
+| nombre             | string                                                             | sí          | Nombre completo del usuario.       |
+| rol                | enum(`estudiante_pregrado`,`estudiante_posgrado`, `bibliotecario`) | sí          | Define límites de préstamo.        |
+| estado             | enum(`activo`,`bloqueado`, `inactivo`)                             | sí          | Estado general para préstamos.     |
 
 ### Entidad: Préstamo
 
 | Campo                     | Tipo                                           | Obligatorio | Descripción                                  |
-| ------------------------- | ---------------------------------------------- | ----------- | 
-| id                        | string                                         | sí          | Identificador único del préstamo.                   |
-| usuario_id                | string                                         | sí             | Usuario que realiza el préstamo.                   |
-| ejemplar_id               | string                                         | sí          | Ejemplar prestado.                    |
-| fecha_prestamo            | string (ISO 8601)                              | sí          | Fecha y hora de creación del préstamo.                   |
-| fecha_devolucion_esperada | string (ISO 8601)                              | sí          | Fecha límite calculada por regla de negocio.                    |
-| fecha_devolucion_real     | string (ISO 8601)                              | no          | Fecha real de devolución.                 |
-| estado                    | enum(`activo`,`vencido`,`devuelto`,`renovado`) | sí          | Estado actual del préstamo.                   |
-| renovaciones              | number                                         | sí          | Cantidad de renovaciones aplicadas.                  |
+| ------------------------- | ---------------------------------------------- | ----------- | -------------------------------------------- |
+| id                        | string                                         | sí          | Identificador único del préstamo.            |
+| usuario_id                | string                                         | sí          | Usuario que realiza el préstamo.             |
+| ejemplar_id               | string                                         | sí          | Ejemplar prestado.                           |
+| fecha_prestamo            | string (ISO 8601)                              | sí          | Fecha y hora de creación del préstamo.       |
+| fecha_devolucion_esperada | string (ISO 8601)                              | sí          | Fecha límite calculada por regla de negocio. |
+| fecha_devolucion_real     | string (ISO 8601)                              | no          | Fecha real de devolución.                    |
+| estado                    | enum(`activo`,`vencido`,`devuelto`,`renovado`) | sí          | Estado actual del préstamo.                  |
+| renovaciones              | number                                         | sí          | Cantidad de renovaciones aplicadas.          |
 
 ### Entidad: Multa
-| Campo            | Tipo                       | Obligatorio | Descripción                         |
-| ---------------- | -------------------------- | ----------- | ----------------------------------- |
-| id               | string                     | sí          | Identificador único de la multa.    |
-| prestamo_id      | string                     | sí          | Préstamo que originó la multa.      |
+
+| Campo            | Tipo                       | Obligatorio | Descripción                      |
+| ---------------- | -------------------------- | ----------- | -------------------------------- |
+| id               | string                     | sí          | Identificador único de la multa. |
+| prestamo_id      | string                     | sí          | Préstamo que originó la multa.   |
 | usuario_id       | string                     | sí          | Usuario responsable de la multa. |
-| dias_retraso     | number                     | sí          | Días de retraso al devolver.        |
-| valor_por_dia    | number                     | sí          | Valor fijo por día (2000).          |
-| valor_total      | number                     | sí          | Total calculado de multa.           |
-| estado           | enum(`pendiente`,`pagada`) | sí          | Estado de pago de la multa.         |
-| fecha_generacion | string                     | sí          | Fecha de creación de la multa.      |
+| dias_retraso     | number                     | sí          | Días de retraso al devolver.     |
+| valor_por_dia    | number                     | sí          | Valor fijo por día (2000).       |
+| valor_total      | number                     | sí          | Total calculado de multa.        |
+| estado           | enum(`pendiente`,`pagada`) | sí          | Estado de pago de la multa.      |
+| fecha_generacion | string                     | sí          | Fecha de creación de la multa.   |
 
 ### Entidad: SolicitudEspera
+
 | Campo           | Tipo                                  | Obligatorio | Descripción                        |
 | --------------- | ------------------------------------- | ----------- | ---------------------------------- |
-| id              | string                                | sí          | Identificador único de solicitud.   |
+| id              | string                                | sí          | Identificador único de solicitud.  |
 | libro_id        | string                                | sí          | Libro que el estudiante desea.     |
 | usuario_id      | string                                | sí          | Usuario solicitante.               |
 | fecha_solicitud | string (ISO 8601)                     | sí          | Fecha de creación de la solicitud. |
 | estado          | enum(`activa`,`atendida`,`cancelada`) | sí          | Estado de la solicitud.            |
 
 ### Diagrama de relaciones
+
 Libro 1 --- N Ejemplar
 Estudiante 1 --- N Prestamo
 Ejemplar 1 --- N Prestamo (historico, no simultaneo)
@@ -117,19 +120,19 @@ Estudiante 1 --- N SolicitudEspera
 
 ## 4. Endpoints REST
 
-| Método  | Ruta                                   | Propósito                                          | Body / Query                                                      | Respuesta éxito                        | Códigos error posibles |
------------------------------------------------------------------ | -------------------------------------- | ---------------------- |
-| `GET`   | `/libros`                              | Listar catálogo de libros                          | Query opcional: `titulo`, `autor`, `sala`, `disponible`           | `200` con lista                        | `400`                  |
-| `GET`   | `/libros/:id`                          | Consultar detalle de libro                         | -                                                                 | `200` con objeto                       | `404`                  |
-| `GET`   | `/libros/:id/ejemplares`               | Consultar ejemplares y estado por libro            | -                                                                 | `200` con lista                        | `404`                  |
-| `GET`   | `/estudiantes/:id/prestamos-activos`   | Ver préstamos vigentes de estudiante               | -                                                                 | `200` con lista                        | `404`                  |
-| `GET`   | `/estudiantes/:id/historial-prestamos` | Ver historial completo de préstamos                | Query opcional: `estado`, `desde`, `hasta`                        | `200` con lista                        | `404`                  |
-| `GET`   | `/estudiantes/:id/multas`              | Ver multas de estudiante                           | Query opcional: `estado`                                          | `200` con lista                        | `404`                  |
-| `POST`  | `/prestamos`                           | Crear préstamo de ejemplar                         | `{estudiante_id, ejemplar_id}`                                    | `201` con préstamo                     | `400`, `404`, `409`    |
-| `PATCH` | `/prestamos/:id/renovar`               | Renovar préstamo activo                            | `{motivo}` opcional                                               | `200` con préstamo actualizado         | `400`, `404`, `409`    |
-| `PATCH` | `/prestamos/:id/devolver`              | Registrar devolución y calcular multa si aplica    | `{fecha_devolucion_real}` opcional                                | `200` con préstamo y multa (si aplica) | `400`, `404`, `409`    |
-| `GET`   | `/prestamos/vencidos`                  | Consultar préstamos vencidos                       | Query opcional: `estudiante_id`                                   | `200` con lista                        | `400`                  |
-| `POST`  | `/solicitudes-espera`                  | Registrar estudiante en cola de espera de un libro | `{estudiante_id, libro_id}`                                       | `201` con solicitud                    | `400`, `404`, `409`    |
+| Método  | Ruta                                   | Propósito                                          | Body / Query                                            | Respuesta éxito                        | Códigos error posibles |
+| ------- | -------------------------------------- | -------------------------------------------------- | ------------------------------------------------------- | -------------------------------------- | ---------------------- |
+| `GET`   | `/libros`                              | Listar catálogo de libros                          | Query opcional: `titulo`, `autor`, `sala`, `disponible` | `200` con lista                        | `400`                  |
+| `GET`   | `/libros/:id`                          | Consultar detalle de libro                         | -                                                       | `200` con objeto                       | `404`                  |
+| `GET`   | `/libros/:id/ejemplares`               | Consultar ejemplares y estado por libro            | -                                                       | `200` con lista                        | `404`                  |
+| `GET`   | `/estudiantes/:id/prestamos-activos`   | Ver préstamos vigentes de estudiante               | -                                                       | `200` con lista                        | `404`                  |
+| `GET`   | `/estudiantes/:id/historial-prestamos` | Ver historial completo de préstamos                | Query opcional: `estado`, `desde`, `hasta`              | `200` con lista                        | `404`                  |
+| `GET`   | `/estudiantes/:id/multas`              | Ver multas de estudiante                           | Query opcional: `estado`                                | `200` con lista                        | `404`                  |
+| `POST`  | `/prestamos`                           | Crear préstamo de ejemplar                         | `{estudiante_id, ejemplar_id}`                          | `201` con préstamo                     | `400`, `404`, `409`    |
+| `PATCH` | `/prestamos/:id/renovar`               | Renovar préstamo activo                            | `{motivo}` opcional                                     | `200` con préstamo actualizado         | `400`, `404`, `409`    |
+| `PATCH` | `/prestamos/:id/devolver`              | Registrar devolución y calcular multa si aplica    | `{fecha_devolucion_real}` opcional                      | `200` con préstamo y multa (si aplica) | `400`, `404`, `409`    |
+| `GET`   | `/prestamos/vencidos`                  | Consultar préstamos vencidos                       | Query opcional: `estudiante_id`                         | `200` con lista                        | `400`                  |
+| `POST`  | `/solicitudes-espera`                  | Registrar estudiante en cola de espera de un libro | `{estudiante_id, libro_id}`                             | `201` con solicitud                    | `400`, `404`, `409`    |
 
 ---
 
@@ -266,11 +269,10 @@ Estudiante 1 --- N SolicitudEspera
 - **Sin autenticación** en esta versión.
 - **Sin frontend** en esta versión. Solo API REST.
 
-(ISO 8601) 
-
-
+(ISO 8601)
 
 <!--  -->
+
 # Especificación Formal — Sistema de Préstamo de Libros
 
 > **Autor:** [Tu nombre]
@@ -304,8 +306,8 @@ Estudiante 1 --- N SolicitudEspera
 
 ### Entidad: Libro
 
-| Campo     | Tipo     | Obligatorio | Descripción   |
-| `[campo]` | `[tipo]` | sí/no       | [descripción] |
+| Campo | Tipo | Obligatorio | Descripción |
+| `[campo]` | `[tipo]` | sí/no | [descripción] |
 
 ### Entidad: Ejemplar
 
@@ -339,12 +341,12 @@ Prestamo 0..1 --- 1 Multa
 
 ## 4. Endpoints REST
 
-| Método | Ruta | Propósito | Body / Query | Respuesta éxito | Códigos error posibles |
-|---|---|---|---|---|---|
-| `GET` | `/libros` | Listar catálogo | filtros opcionales | `200` con lista | - |
-| `GET` | `/libros/:id` | Detalle libro | - | `200` con objeto | `404` |
-| `POST` | `/prestamos` | Crear préstamo | `{estudiante_id, ejemplar_id}` | `201` con préstamo | `400`, `404`, `409` |
-| ... | ... | ... | ... | ... | ... |
+| Método | Ruta          | Propósito       | Body / Query                   | Respuesta éxito    | Códigos error posibles |
+| ------ | ------------- | --------------- | ------------------------------ | ------------------ | ---------------------- |
+| `GET`  | `/libros`     | Listar catálogo | filtros opcionales             | `200` con lista    | -                      |
+| `GET`  | `/libros/:id` | Detalle libro   | -                              | `200` con objeto   | `404`                  |
+| `POST` | `/prestamos`  | Crear préstamo  | `{estudiante_id, ejemplar_id}` | `201` con préstamo | `400`, `404`, `409`    |
+| ...    | ...           | ...             | ...                            | ...                | ...                    |
 
 [Llena la tabla con todos los endpoints que necesitas. Mínimo 8.]
 
@@ -380,7 +382,6 @@ Prestamo 0..1 --- 1 Multa
 
 [...]
 
-
 ---
 
 ## 6. Decisiones tomadas (lo que el correo no dice)
@@ -407,15 +408,14 @@ Prestamo 0..1 --- 1 Multa
 
 ## 7. Códigos HTTP usados
 
-| Código | Significado | Cuándo se usa |
-|---|---|---|
-| 200 | OK | GET exitosos |
-| 201 | Created | POST exitosos que crean recursos |
-| 400 | Bad Request | Body malformado o validación fallida |
-| 404 | Not Found | Recurso no existe |
-| 409 | Conflict | Reglas de negocio violadas (límite alcanzado, duplicado, etc.) |
-| 500 | Internal Server Error | Error no controlado del servidor |
-
+| Código | Significado           | Cuándo se usa                                                  |
+| ------ | --------------------- | -------------------------------------------------------------- |
+| 200    | OK                    | GET exitosos                                                   |
+| 201    | Created               | POST exitosos que crean recursos                               |
+| 400    | Bad Request           | Body malformado o validación fallida                           |
+| 404    | Not Found             | Recurso no existe                                              |
+| 409    | Conflict              | Reglas de negocio violadas (límite alcanzado, duplicado, etc.) |
+| 500    | Internal Server Error | Error no controlado del servidor                               |
 
 ---
 
