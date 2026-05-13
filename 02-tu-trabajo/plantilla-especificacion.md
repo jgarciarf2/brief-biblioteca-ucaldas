@@ -270,3 +270,4 @@ Desarrollar una API para gestionar el ciclo completo de préstamos de libros en 
 - **TypeScript**
 - **Sin autenticación** en esta versión.
 - **Sin frontend** en esta versión. Solo API REST.
+- Testing: en Jest
