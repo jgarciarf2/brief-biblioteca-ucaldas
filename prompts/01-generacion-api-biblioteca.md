@@ -1,6 +1,49 @@
-- **Fecha y hora:** 2026-05-12 17:21
-- **Proposito:** Crear estructura base y API REST Node.js para biblioteca con endpoints de libros y prestamos.
-- **Prompt completo:** Actua como un desarrollador de software experto. Para este proyecto, debes seguir estrictamente las Reglas de Registro y luego ejecutar la Tarea Actual. Crea la estructura base del proyecto y desarrolla una API REST en Node.js para gestionar los libros de una biblioteca universitaria. Requerimientos tecnicos: usa express, usa almacenamiento en memoria, crea endpoints para listar libros, crear prestamo, devolver libro y consultar prestamos vigentes. Entregables: el codigo de la API REST y el contenido exacto para el archivo prompts/01-generacion-api-biblioteca.md.
-- **Resumen de la respuesta de la IA:** La API ya estaba creada en proyecto/ con Express, datos en memoria y endpoints solicitados. Se registro este prompt en prompts/01-generacion-api-biblioteca.md.
-- **Tu evaluacion:**
+# Plantilla — Registro de Prompts
 
+---
+
+## Prompt #1
+
+**Fecha y hora:** 2026-05-12 17:21
+
+**Propósito en una línea:** Corregir el prompt para la generacion de una API REST de biblioteca.
+
+**Etapa del taller:** 1
+
+**IA usada:** GitHub Copilot
+
+---
+
+### Prompt enviado (literal)
+
+```
+crea una carpeta en la cual vas a desarrollar una API REST en Node.js para gestionar libros en una biblioteca universitaria.
+necesito los endpoints para listar libros, crear prestamos, devolver libros y consultar prestamos vigentes. usa expres y datos en memoria.
+```
+
+---
+
+### Resumen de la respuesta de la IA
+
+[Completar luego]
+
+---
+
+### Mi evaluacion
+
+**¿La respuesta cumplio con lo que pedi?**
+
+- [ ] Completamente.
+- [ ] Parcialmente. Falto: [...]
+- [ ] No, se desvio. Hizo: [...]
+
+**¿La acepte tal cual o la modifique?**
+
+- [ ] Tal cual.
+- [ ] La modifique a mano. Cambios: [...]
+- [ ] Le pedi correccion con un prompt nuevo (ver prompt #[N+1]).
+- [ ] La rechace completamente. Razon: [...]
+
+**¿Que aprendi de esta interaccion?**
+
+[Completar luego]
