@@ -44,15 +44,27 @@ curl http://localhost:3001/
 
 Recorre ambos proyectos y completa la siguiente tabla en tu bitácora:
 
-| Dimensión | v1 | v2 |
-|---|---|---|
-| Lenguaje | | |
-| Validación de entradas al servidor | | |
-| Manejo de errores HTTP | | |
-| Arquitectura (número de capas) | | |
-| Tests incluidos | | |
-| Tipado de datos | | |
-| Forma de iniciar la aplicación | | |
+| Dimensión                          | v1  | v2  |
+| ---------------------------------- | --- | --- |
+| Lenguaje                           |     |     |
+| Validación de entradas al servidor |     |     |
+| Manejo de errores HTTP             |     |     |
+| Arquitectura (número de capas)     |     |     |
+| Tests incluidos                    |     |     |
+| Tipado de datos                    |     |     |
+| Forma de iniciar la aplicación     |     |     |
+
+**Respuesta (Bloque 1.1)**
+
+| Dimensión                          | v1                                                                                           | v2                                                                                             |
+| ---------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Lenguaje                           | JavaScript (Node.js + Express).                                                              | TypeScript (Node.js + Express).                                                                |
+| Validación de entradas al servidor | Validación minima en el handler de prestamos: solo campos requeridos, sin tipos ni formatos. | Validación basica en controladores (chequeo de presencia) y reglas de negocio en casos de uso. |
+| Manejo de errores HTTP             | Respuestas directas con `res.status(...).json({ error })`.                                   | Errores tipados con `AppError` y handler central en cada controller.                           |
+| Arquitectura (número de capas)     | Monolitico en un solo archivo.                                                               | Capas separadas: controllers, routes, use-cases, domain, infrastructure, shared.               |
+| Tests incluidos                    | No hay tests.                                                                                | Tests unitarios e integracion en `tests/`.                                                     |
+| Tipado de datos                    | Sin tipado.                                                                                  | Tipos y entidades en `src/domain`.                                                             |
+| Forma de iniciar la aplicación     | `node app.js` (servidor definido en el mismo archivo).                                       | `src/index.ts` -> server -> app.                                                               |
 
 ### Ejercicio 1.2 — Rastreo de una regla de negocio
 
@@ -62,6 +74,22 @@ Localiza la **RN1: límite de préstamos simultáneos por tipo de estudiante** e
 2. ¿En qué archivo(s) está en v2? ¿Qué capas atraviesa?
 3. Si el cliente pide cambiar el límite de pregrado de 3 a 4, ¿cuántos archivos hay que modificar en cada versión?
 4. ¿Cómo sabrías que el cambio no rompió nada en cada versión?
+
+**Respuesta (Bloque 1.2)**
+
+1. En v1, la RN1 (limite por tipo de estudiante) **no esta implementada**. Solo hay validacion de disponibilidad de ejemplares por libro en [proyecto-v1/app.js](proyecto-v1/app.js#L60-L81).
+
+2. En v2 esta en el caso de uso de creacion de prestamo: `getLimitePrestamos` y la validacion de `actuales >= limite` en [proyecto-v2/src/use-cases/prestamos/createPrestamo.ts](proyecto-v2/src/use-cases/prestamos/createPrestamo.ts#L29-L97). Capas: controller -> use-case -> repositorio in-memory.
+
+3. Cambio pregrado 3 -> 4:
+
+- v1: no hay RN1, por lo tanto hoy no hay archivo a cambiar (habria que agregar logica nueva en [proyecto-v1/app.js](proyecto-v1/app.js#L60-L94) si se quisiera implementar).
+- v2: un solo archivo: [proyecto-v2/src/use-cases/prestamos/createPrestamo.ts](proyecto-v2/src/use-cases/prestamos/createPrestamo.ts#L29-L33).
+
+4. Verificacion de no romper nada:
+
+- v1: pruebas manuales (curl / Postman) porque no hay suite de tests.
+- v2: ejecutar `npm test` para validar unitarios e integracion, mas un par de pruebas manuales.
 
 ---
 
@@ -89,23 +117,67 @@ Responde en tu bitácora:
 3. ¿Cuál respuesta es más útil para un cliente que consume la API?
 4. ¿Qué pasa en v1 si `ejemplarId` llega como string en lugar de número? ¿Y en v2?
 
+**Respuesta (Bloque 2.1)**
+
+Nota: en el codigo real, los endpoints son `/prestamos` en ambas versiones, no `/api/prestamos`.
+
+1. Codigo HTTP:
+
+- v1: 400.
+- v2: 400.
+
+2. Cuerpo de respuesta:
+
+- v1: `{ "error": "libroId y estudianteId son obligatorios" }` (porque falta `libroId`).
+- v2: `{ "error": "body_invalido" }` (porque espera `estudiante_id` y `ejemplar_id`).
+
+3. Utilidad para cliente:
+
+- v1 es mas explicita sobre campos faltantes.
+- v2 es mas consistente para un cliente que maneja codigos de error tipados.
+
+4. `ejemplarId` como string:
+
+- v1 no usa `ejemplarId`, solo `libroId`. Si `libroId` llega como string numerico funciona (se convierte con `Number`), si no es numerico termina en 404 "El libro no existe".
+- v2 trabaja con ids string (`ejemplar_id`), asi que un string es el formato esperado.
+
 ### Ejercicio 2.2 — Comparar errores de dominio
 
 Provoca el mismo error de negocio en ambas versiones: intenta prestar un ejemplar que ya está prestado.
 
 Pasos sugeridos:
+
 1. Crea un préstamo con el ejemplar 1
 2. Intenta crear otro préstamo con el mismo ejemplar 1
 
 Registra y compara:
 
-| Aspecto | v1 | v2 |
-|---|---|---|
-| Código HTTP | | |
-| Campo `error` en la respuesta | | |
-| Mensaje legible | | |
-| Información adicional (detalles) | | |
-| ¿Expone información interna del servidor? | | |
+| Aspecto                                   | v1  | v2  |
+| ----------------------------------------- | --- | --- |
+| Código HTTP                               |     |     |
+| Campo `error` en la respuesta             |     |     |
+| Mensaje legible                           |     |     |
+| Información adicional (detalles)          |     |     |
+| ¿Expone información interna del servidor? |     |     |
+
+**Respuesta (Bloque 2.2)**
+
+Prueba realizada:
+
+- v1: crear prestamo con `libroId=3` dos veces (el libro tiene 1 ejemplar).
+- v2: intentar crear prestamo dos veces con `user-1`/`ej-1`.
+
+Resultado:
+
+| Aspecto                                   | v1                                   | v2                                   |
+| ----------------------------------------- | ------------------------------------ | ------------------------------------ |
+| Código HTTP                               | 201 en el primero, 409 en el segundo | 201 en el primero, 409 en el segundo |
+| Campo `error` en la respuesta             | `No hay ejemplares disponibles`      | `ejemplar_no_disponible`             |
+| Mensaje legible                           | Si                                   | Si (codigo de dominio)               |
+| Información adicional (detalles)          | No                                   | No                                   |
+| ¿Expone información interna del servidor? | No                                   | No                                   |
+
+Nota: para v2 se uso seed de datos base (usuario `user-1` y ejemplar `ej-1`).
 
 ---
 
@@ -117,13 +189,12 @@ Abre el archivo `proyecto-v2/tests/unit/CrearPrestamo.test.ts` y responde:
 
 1. ¿Qué técnica de aislamiento se usa? (mocks, stubs, fakes, spies)
 2. ¿Se levanta algún servidor HTTP para ejecutar este test? ¿Por qué importa esto?
-4. Identifica en qué línea(s) del archivo se prueba la **RN4** (multa pendiente) y la **RN3** (préstamos vencidos pendientes).
-5. ¿Cuánto tiempo tarda en ejecutarse este test? Corre `npm 
+3. Identifica en qué línea(s) del archivo se prueba la **RN4** (multa pendiente) y la **RN3** (préstamos vencidos pendientes).
+4. ¿Cuánto tiempo tarda en ejecutarse este test? Corre `npm
 
 ---
 
 ## Bloque 4 — Escritura de tests
-
 
 ### Ejercicio 4.1 — Un test que v1 no puede tener con la misma velocidad
 
@@ -132,7 +203,7 @@ En `proyecto-v2`, escribe un test unitario para `CrearPrestamo` que verifique qu
 Plantilla de inicio:
 
 ```typescript
-it('RN1 — posgrado falla al intentar el sexto préstamo', async () => {
+it("RN1 — posgrado falla al intentar el sexto préstamo", async () => {
   const vigentes: Prestamo[] = Array.from({ length: 5 }, (_, i) => ({
     // completa los campos necesarios
   }));
@@ -142,4 +213,3 @@ it('RN1 — posgrado falla al intentar el sexto préstamo', async () => {
 ```
 
 Una vez terminado, reflexiona: ¿por qué sería más lento o difícil escribir este test en v1?
-
