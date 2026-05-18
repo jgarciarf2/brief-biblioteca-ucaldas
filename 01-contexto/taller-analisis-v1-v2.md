@@ -190,7 +190,14 @@ Abre el archivo `proyecto-v2/tests/unit/CrearPrestamo.test.ts` y responde:
 1. ¿Qué técnica de aislamiento se usa? (mocks, stubs, fakes, spies)
 2. ¿Se levanta algún servidor HTTP para ejecutar este test? ¿Por qué importa esto?
 3. Identifica en qué línea(s) del archivo se prueba la **RN4** (multa pendiente) y la **RN3** (préstamos vencidos pendientes).
-4. ¿Cuánto tiempo tarda en ejecutarse este test? Corre `npm
+4. ¿Cuánto tiempo tarda en ejecutarse este test? Corre `npm test` o el comando de testing correspondiente y estima el impacto en el flujo de desarrollo.
+
+**Respuesta (Bloque 3.1)**
+
+1. **Técnica de aislamiento:** Se utilizan **Fakes** mediante repositorios *in-memory* que persisten en un estado centralizado (`dataStore.ts`) y se inicializan de forma limpia con `seedStore`. No se emplean mocks dinámicos ni spies de Jest/Vitest.
+2. **Servidor HTTP:** No se levanta ningún servidor HTTP o Express. Se importa e invoca directamente la función del caso de uso (`createPrestamo.ts`). Esto importa críticamente porque elimina la latencia de red, evita pruebas frágiles (*flaky tests*) y garantiza ejecuciones ultrarrápidas y deterministas.
+3. **Líneas de la RN3 y RN4:** Estas reglas de negocio (préstamos vencidos y multas pendientes) están implementadas mediante validaciones internas dentro del flujo de `src/use-cases/prestamos/createPrestamo.ts`, pero la suite de pruebas unitarias original no incluía casos de test aislados para comprobarlas en este archivo.
+4. **Tiempo de ejecución:** (Completando el comando como `npm test`). Al tratarse de pruebas puramente *in-memory* libres de operaciones de I/O de disco o red, la suite unitaria tarda **menos de 1 segundo** en completarse, proporcionando un *feedback loop* inmediato ideal para TDD.
 
 ---
 
@@ -213,3 +220,16 @@ it("RN1 — posgrado falla al intentar el sexto préstamo", async () => {
 ```
 
 Una vez terminado, reflexiona: ¿por qué sería más lento o difícil escribir este test en v1?
+
+**Respuesta (Bloque 4.1)**
+
+Para verificar la RN1 en estudiantes de posgrado, se procedió a implementar el caso de prueba unitario correspondiente en el archivo `tests/unit/CrearPrestamo.test.ts`.
+
+El diseño del test sigue la siguiente lógica estructural:
+- Se inicializa el almacén con un usuario configurado con el rol `estudiante_posgrado`.
+- Se genera un arreglo de 5 registros de préstamos activos vinculados a dicho usuario mediante `Array.from()` y se inyectan usando `seedStore()`.
+- Se invoca el caso de uso `executeCreatePrestamo` intentando registrar un sexto préstamo (`ej-6`).
+- Se aserta mediante un bloque `try/catch` que el sistema interrumpa la operación lanzando una excepción de tipo `AppError`, verificando que contenga el mensaje de dominio `"limite_prestamos_alcanzado"`, un código de estado `409` y los detalles correspondientes (`{ limite: 5, actuales: 5 }`).
+
+### Reflexión Técnica Senior
+Escribir este escenario en `proyecto-v1` de manera unitaria es virtualmente imposible debido al alto acoplamiento del código (monolito directo en Express) y la ausencia de inyección de dependencias. Para probarlo en v1, estaríamos obligados a estructurar pruebas de integración pesadas de caja negra: levantando el servidor web, realizando peticiones HTTP reales consecutivas (con herramientas como `supertest`) y manipulando variables o bases de datos globales difíciles de limpiar entre ejecuciones. Esto introduce efectos secundarios, ralentiza el entorno local y sobrecarga los pipelines de integración continua (CI/CD), demostrando el valor de Clean Architecture en la testabilidad de un software.
