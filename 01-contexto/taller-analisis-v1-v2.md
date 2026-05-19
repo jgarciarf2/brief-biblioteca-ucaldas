@@ -212,9 +212,7 @@ Plantilla de inicio:
 ```typescript
 it("RN1 — posgrado falla al intentar el sexto préstamo", async () => {
   const vigentes: Prestamo[] = Array.from({ length: 5 }, (_, i) => ({
-    // completa los campos necesarios
   }));
-  // construye el caso de uso con los repos mockeados
   // verifica que lanza LimitePrestamosAlcanzado
 });
 ```
@@ -223,13 +221,13 @@ Una vez terminado, reflexiona: ¿por qué sería más lento o difícil escribir 
 
 **Respuesta (Bloque 4.1)**
 
-Para verificar la RN1 en estudiantes de posgrado, se procedió a implementar el caso de prueba unitario correspondiente en el archivo `tests/unit/CrearPrestamo.test.ts`.
+Para verificar la RN1 en estudiantes de posgrado, se implementó el caso de prueba unitario en `tests/unit/CrearPrestamo.test.ts`.
 
-El diseño del test sigue la siguiente lógica estructural:
-- Se inicializa el almacén con un usuario configurado con el rol `estudiante_posgrado`.
-- Se genera un arreglo de 5 registros de préstamos activos vinculados a dicho usuario mediante `Array.from()` y se inyectan usando `seedStore()`.
-- Se invoca el caso de uso `executeCreatePrestamo` intentando registrar un sexto préstamo (`ej-6`).
-- Se aserta mediante un bloque `try/catch` que el sistema interrumpa la operación lanzando una excepción de tipo `AppError`, verificando que contenga el mensaje de dominio `"limite_prestamos_alcanzado"`, un código de estado `409` y los detalles correspondientes (`{ limite: 5, actuales: 5 }`).
+El test sigue esta lógica:
+- Se limpia el estado con `resetStore()` en `beforeEach`.
+- Se crea un helper `buildPrestamo` para evitar duplicación y se generan 5 préstamos activos con `Array.from()`.
+- Se siembra el *data store* con un usuario `estudiante_posgrado`, un libro y 6 ejemplares (el 6 disponible).
+- Se invoca `executeCreatePrestamo` con `ej-6` y se valida con `try/catch` que lance `AppError` con `"limite_prestamos_alcanzado"`, `statusCode` 409 y detalles `{ limite: 5, actuales: 5 }`.
 
-### Reflexión Técnica Senior
-Escribir este escenario en `proyecto-v1` de manera unitaria es virtualmente imposible debido al alto acoplamiento del código (monolito directo en Express) y la ausencia de inyección de dependencias. Para probarlo en v1, estaríamos obligados a estructurar pruebas de integración pesadas de caja negra: levantando el servidor web, realizando peticiones HTTP reales consecutivas (con herramientas como `supertest`) y manipulando variables o bases de datos globales difíciles de limpiar entre ejecuciones. Esto introduce efectos secundarios, ralentiza el entorno local y sobrecarga los pipelines de integración continua (CI/CD), demostrando el valor de Clean Architecture en la testabilidad de un software.
+### Reflexión
+En `proyecto-v1` sería más lento porque no hay inyección de dependencias ni repositorios *in-memory*: habría que levantar el servidor, hacer múltiples requests HTTP reales y limpiar estado global entre pruebas, lo cual hace el ciclo de feedback más lento y frágil.
