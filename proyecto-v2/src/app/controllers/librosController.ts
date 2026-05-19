@@ -3,6 +3,7 @@ import { executeGetLibroById } from "../../use-cases/libros/getLibroById";
 import { executeListEjemplaresByLibro } from "../../use-cases/libros/listEjemplaresByLibro";
 import { executeListLibros } from "../../use-cases/libros/listLibros";
 import { executeCrearLibro } from "../../use-cases/libros/crearLibro";
+import { executeCrearEjemplar } from "../../use-cases/libros/crearEjemplar";
 import { AppError } from "../../shared/errors/AppError";
 
 const parseDisponible = (value?: string) => {
@@ -75,6 +76,15 @@ export const crearLibroController = async (req: Request, res: Response) => {
   try {
     const libro = await executeCrearLibro(req.body);
     return res.status(201).json(libro);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+export const crearEjemplarController = async (req: Request, res: Response) => {
+  try {
+    const ejemplar = await executeCrearEjemplar(String(req.params.libroId), req.body);
+    return res.status(201).json(ejemplar);
   } catch (error) {
     return handleError(res, error);
   }

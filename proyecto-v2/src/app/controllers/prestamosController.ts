@@ -17,7 +17,9 @@ const handleError = (res: Response, error: unknown) => {
 
 export const createPrestamoController = async (req: Request, res: Response) => {
   try {
-    const { estudiante_id, ejemplar_id } = req.body || {};
+    const estudiante_id = req.body?.estudiante_id || req.body?.estudianteId;
+    const ejemplar_id = req.body?.ejemplar_id || req.body?.ejemplarId;
+
     if (!estudiante_id || !ejemplar_id) {
       return res.status(400).json({ error: "body_invalido" });
     }

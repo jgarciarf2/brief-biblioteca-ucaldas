@@ -1,13 +1,13 @@
 import { Libro, TipoPrestamo } from "../../domain/entities/Libro";
 import {
   addLibro,
-  findLibroById,
 } from "../../infrastructure/persistence/sqlite/libroRepository";
 import { nextId } from "../../infrastructure/persistence/sqlite/dataStore";
 import { AppError } from "../../shared/errors/AppError";
 
 export type CrearLibroInput = {
-  codigo_inventario: string;
+  id?: string;
+  codigo_inventario?: string;
   titulo: string;
   autor: string;
   sala: string;
@@ -21,7 +21,6 @@ export const executeCrearLibro = async (
   input: CrearLibroInput,
 ): Promise<Libro> => {
   const {
-    codigo_inventario,
     titulo,
     autor,
     sala,
@@ -29,10 +28,13 @@ export const executeCrearLibro = async (
     altaDemanda,
   } = input;
 
+  const id = input.id || await nextId("libro");
+  const codigo_inventario = input.codigo_inventario || id;
+
   // Validaciones
-  if (!codigo_inventario || !titulo || !autor || !sala) {
+  if (!titulo || !autor || !sala) {
     throw new AppError("campos_requeridos_faltantes", 400, {
-      requeridos: ["codigo_inventario", "titulo", "autor", "sala"],
+      requeridos: ["titulo", "autor", "sala"],
     });
   }
 
@@ -49,8 +51,6 @@ export const executeCrearLibro = async (
       : altaDemanda
       ? "alta_demanda"
       : "normal";
-
-  const id = await nextId("libro");
 
   const nuevoLibro: Libro = {
     id,
