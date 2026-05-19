@@ -421,18 +421,18 @@ Llena esta tabla con lo que observaste al correr cada prueba en ambas versiones.
 
 | Prueba                         | Regla | Esperado        | Sin IA — HTTP | Sin IA — body util | Con IA — HTTP | Con IA — body util |
 | ------------------------------ | ----- | --------------- | ------------- | ------------------ | ------------- | ------------------ |
-| RN1-B cuarto prestamo pregrado | RN1   | 409             |               |                    | 409           | Si                 |
-| RN2-B sexto prestamo posgrado  | RN2   | 409             |               |                    | 409           | Si                 |
-| RN5-B ejemplar ya prestado     | RN5   | 409             |               |                    | 409           | Si                 |
-| RN6-A plazo libro normal       | RN6   | fecha + 15 dias |               |                    | 201           | Si                 |
-| RN6-B plazo alta demanda       | RN6   | fecha + 3 dias  |               |                    | 201           | Si                 |
-| RN3 prestamo con vencido       | RN3   | 409             |               |                    | 409           | Si                 |
-| RN4-B prestamo con multa       | RN4   | 409             |               |                    | 409           | Si                 |
-| RN8 calculo de multa           | RN8   | N x 2000        |               |                    | 200           | Si                 |
-| VAL-1 body vacio               | —     | 400             |               |                    | 400           | Si                 |
-| VAL-2 estudiante inexistente   | —     | 404             |               |                    | 404           | Si                 |
-| VAL-3 ejemplar inexistente     | —     | 404             |               |                    | 404           | Si                 |
-| VAL-4 tipo incorrecto          | —     | 400             |               |                    | 404           | Si                 |
+| RN1-B cuarto prestamo pregrado | RN1   | 409             | 404           | No                 | 409           | Si                 |
+| RN2-B sexto prestamo posgrado  | RN2   | 409             | 404           | No                 | 409           | Si                 |
+| RN5-B ejemplar ya prestado     | RN5   | 409             | 404           | No                 | 409           | Si                 |
+| RN6-A plazo libro normal       | RN6   | fecha + 15 dias | 404           | No                 | 201           | Si                 |
+| RN6-B plazo alta demanda       | RN6   | fecha + 3 dias  | 404           | No                 | 201           | Si                 |
+| RN3 prestamo con vencido       | RN3   | 409             | 404           | No                 | 409           | Si                 |
+| RN4-B prestamo con multa       | RN4   | 409             | 404           | No                 | 409           | Si                 |
+| RN8 calculo de multa           | RN8   | N x 2000        | 404           | No                 | 200           | Si                 |
+| VAL-1 body vacio               | —     | 400             | 404           | No                 | 400           | Si                 |
+| VAL-2 estudiante inexistente   | —     | 404             | 404           | No                 | 404           | Si                 |
+| VAL-3 ejemplar inexistente     | —     | 404             | 404           | No                 | 404           | Si                 |
+| VAL-4 tipo incorrecto          | —     | 400             | 404           | No                 | 404           | Si                 |
 
 **Columna "body util":** escribe `Si` si la respuesta incluye un mensaje que explica por que fallo, o `No` si solo devuelve el codigo sin explicacion.
 
