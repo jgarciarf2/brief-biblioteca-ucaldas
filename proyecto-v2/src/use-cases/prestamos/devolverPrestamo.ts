@@ -1,13 +1,13 @@
 import {
   findEjemplarById,
   updateEjemplar,
-} from "../../infrastructure/persistence/in-memory/ejemplarRepository";
-import { addMulta } from "../../infrastructure/persistence/in-memory/multaRepository";
-import { nextId } from "../../infrastructure/persistence/in-memory/dataStore";
+} from "../../infrastructure/persistence/sqlite/ejemplarRepository";
+import { addMulta } from "../../infrastructure/persistence/sqlite/multaRepository";
+import { nextId } from "../../infrastructure/persistence/sqlite/dataStore";
 import {
   findPrestamoById,
   updatePrestamo,
-} from "../../infrastructure/persistence/in-memory/prestamoRepository";
+} from "../../infrastructure/persistence/sqlite/prestamoRepository";
 import { AppError } from "../../shared/errors/AppError";
 import {
   daysLate,
@@ -16,17 +16,17 @@ import {
 } from "../../shared/utils/dateUtils";
 import { isPrestamoActivo, normalizePrestamo } from "./prestamoHelpers";
 
-export const executeDevolverPrestamo = (
+export const executeDevolverPrestamo = async (
   prestamoId: string,
   fechaReal?: string,
 ) => {
-  const prestamo = findPrestamoById(prestamoId);
+  const prestamo = await findPrestamoById(prestamoId);
   if (!prestamo) {
     throw new AppError("prestamo_no_encontrado", 404);
   }
 
   const nowIso = toIsoString(new Date());
-  const normalized = normalizePrestamo(prestamo, nowIso);
+  const normalized = await normalizePrestamo(prestamo, nowIso);
 
   if (
     !(isPrestamoActivo(normalized.estado) || normalized.estado === "vencido")
@@ -39,20 +39,20 @@ export const executeDevolverPrestamo = (
     throw new AppError("fecha_devolucion_invalida", 400);
   }
 
-  const actualizado = {
+  const actualizado: any = {
     ...normalized,
     fecha_devolucion_real: fechaDevolucionReal,
     estado: "devuelto",
   };
 
-  updatePrestamo(actualizado);
+  await updatePrestamo(actualizado);
 
-  const ejemplar = findEjemplarById(actualizado.ejemplar_id);
+  const ejemplar = await findEjemplarById(actualizado.ejemplar_id);
   if (!ejemplar) {
     throw new AppError("ejemplar_no_encontrado", 404);
   }
 
-  updateEjemplar({
+  await updateEjemplar({
     ...ejemplar,
     estado: "disponible",
   });
@@ -62,8 +62,8 @@ export const executeDevolverPrestamo = (
     fechaDevolucionReal,
   );
   if (dias > 0) {
-    const multa = {
-      id: nextId("multa"),
+    const multa: any = {
+      id: await nextId("multa"),
       prestamo_id: actualizado.id,
       usuario_id: actualizado.usuario_id,
       dias_retraso: dias,
@@ -73,7 +73,7 @@ export const executeDevolverPrestamo = (
       fecha_generacion: nowIso,
     };
 
-    addMulta(multa);
+    await addMulta(multa);
     return { prestamo: actualizado, multa };
   }
 

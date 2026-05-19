@@ -27,7 +27,7 @@ const handleError = (res: Response, error: unknown) => {
   return res.status(500).json({ error: "internal_error" });
 };
 
-export const listLibrosController = (req: Request, res: Response) => {
+export const listLibrosController = async (req: Request, res: Response) => {
   try {
     const titulo = req.query.titulo
       ? String(req.query.titulo).toLowerCase()
@@ -40,28 +40,30 @@ export const listLibrosController = (req: Request, res: Response) => {
       req.query.disponible ? String(req.query.disponible) : undefined,
     );
 
-    const libros = executeListLibros({ titulo, autor, sala, disponible });
+    const libros = await executeListLibros({ titulo, autor, sala, disponible });
     return res.json(libros);
   } catch (error) {
     return handleError(res, error);
   }
 };
 
-export const getLibroController = (req: Request, res: Response) => {
+export const getLibroController = async (req: Request, res: Response) => {
   try {
-    const libro = executeGetLibroById(String(req.params.id));
+    const libro = await executeGetLibroById(String(req.params.id));
     return res.json(libro);
   } catch (error) {
     return handleError(res, error);
   }
 };
 
-export const listEjemplaresByLibroController = (
+export const listEjemplaresByLibroController = async (
   req: Request,
   res: Response,
 ) => {
   try {
-    const ejemplares = executeListEjemplaresByLibro(String(req.params.id));
+    const ejemplares = await executeListEjemplaresByLibro(
+      String(req.params.id),
+    );
     return res.json(ejemplares);
   } catch (error) {
     return handleError(res, error);

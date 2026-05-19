@@ -15,14 +15,14 @@ const handleError = (res: Response, error: unknown) => {
   return res.status(500).json({ error: "internal_error" });
 };
 
-export const createPrestamoController = (req: Request, res: Response) => {
+export const createPrestamoController = async (req: Request, res: Response) => {
   try {
     const { estudiante_id, ejemplar_id } = req.body || {};
     if (!estudiante_id || !ejemplar_id) {
       return res.status(400).json({ error: "body_invalido" });
     }
 
-    const prestamo = executeCreatePrestamo({
+    const prestamo = await executeCreatePrestamo({
       estudiante_id: String(estudiante_id),
       ejemplar_id: String(ejemplar_id),
     });
@@ -33,19 +33,25 @@ export const createPrestamoController = (req: Request, res: Response) => {
   }
 };
 
-export const renovarPrestamoController = (req: Request, res: Response) => {
+export const renovarPrestamoController = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    const prestamo = executeRenovarPrestamo(String(req.params.id));
+    const prestamo = await executeRenovarPrestamo(String(req.params.id));
     return res.json(prestamo);
   } catch (error) {
     return handleError(res, error);
   }
 };
 
-export const devolverPrestamoController = (req: Request, res: Response) => {
+export const devolverPrestamoController = async (
+  req: Request,
+  res: Response,
+) => {
   try {
     const fecha = req.body?.fecha_devolucion_real;
-    const resultado = executeDevolverPrestamo(
+    const resultado = await executeDevolverPrestamo(
       String(req.params.id),
       fecha ? String(fecha) : undefined,
     );
@@ -55,7 +61,7 @@ export const devolverPrestamoController = (req: Request, res: Response) => {
   }
 };
 
-export const listPrestamosVencidosController = (
+export const listPrestamosVencidosController = async (
   req: Request,
   res: Response,
 ) => {
@@ -63,7 +69,7 @@ export const listPrestamosVencidosController = (
     const estudianteId = req.query.estudiante_id
       ? String(req.query.estudiante_id)
       : undefined;
-    const prestamos = executeListPrestamosVencidos(estudianteId);
+    const prestamos = await executeListPrestamosVencidos(estudianteId);
     return res.json(prestamos);
   } catch (error) {
     return handleError(res, error);

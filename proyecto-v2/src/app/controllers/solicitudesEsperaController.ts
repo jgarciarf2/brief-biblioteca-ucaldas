@@ -12,7 +12,7 @@ const handleError = (res: Response, error: unknown) => {
   return res.status(500).json({ error: "internal_error" });
 };
 
-export const createSolicitudEsperaController = (
+export const createSolicitudEsperaController = async (
   req: Request,
   res: Response,
 ) => {
@@ -22,7 +22,7 @@ export const createSolicitudEsperaController = (
       return res.status(400).json({ error: "body_invalido" });
     }
 
-    const solicitud = executeCreateSolicitudEspera({
+    const solicitud = await executeCreateSolicitudEspera({
       estudiante_id: String(estudiante_id),
       libro_id: String(libro_id),
     });

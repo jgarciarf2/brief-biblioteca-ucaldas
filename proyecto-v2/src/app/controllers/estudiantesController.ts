@@ -14,16 +14,19 @@ const handleError = (res: Response, error: unknown) => {
   return res.status(500).json({ error: "internal_error" });
 };
 
-export const listPrestamosActivosController = (req: Request, res: Response) => {
+export const listPrestamosActivosController = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    const prestamos = executeListPrestamosActivos(String(req.params.id));
+    const prestamos = await executeListPrestamosActivos(String(req.params.id));
     return res.json(prestamos);
   } catch (error) {
     return handleError(res, error);
   }
 };
 
-export const listHistorialPrestamosController = (
+export const listHistorialPrestamosController = async (
   req: Request,
   res: Response,
 ) => {
@@ -32,7 +35,7 @@ export const listHistorialPrestamosController = (
     const desde = req.query.desde ? String(req.query.desde) : undefined;
     const hasta = req.query.hasta ? String(req.query.hasta) : undefined;
 
-    const prestamos = executeListHistorialPrestamos({
+    const prestamos = await executeListHistorialPrestamos({
       usuarioId: String(req.params.id),
       estado,
       desde,
@@ -45,10 +48,10 @@ export const listHistorialPrestamosController = (
   }
 };
 
-export const listMultasController = (req: Request, res: Response) => {
+export const listMultasController = async (req: Request, res: Response) => {
   try {
     const estado = req.query.estado ? String(req.query.estado) : undefined;
-    const multas = executeListMultas(String(req.params.id), estado);
+    const multas = await executeListMultas(String(req.params.id), estado);
     return res.json(multas);
   } catch (error) {
     return handleError(res, error);
