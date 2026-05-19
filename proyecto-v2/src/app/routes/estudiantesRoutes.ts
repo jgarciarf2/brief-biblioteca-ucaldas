@@ -16,6 +16,10 @@ router.get(
   "/estudiantes/:id/historial-prestamos",
   listHistorialPrestamosController,
 );
+router.get(
+  "/estudiantes/:id/historial",
+  listHistorialPrestamosController,
+);
 router.get("/estudiantes/:id/multas", listMultasController);
 router.post("/estudiantes", crearEstudianteController);
 

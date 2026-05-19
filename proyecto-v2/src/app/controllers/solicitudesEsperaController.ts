@@ -17,7 +17,8 @@ export const createSolicitudEsperaController = async (
   res: Response,
 ) => {
   try {
-    const { estudiante_id, libro_id } = req.body || {};
+    const estudiante_id = req.body?.estudiante_id || req.body?.estudianteId;
+    const libro_id = req.body?.libro_id || req.body?.libroId;
     if (!estudiante_id || !libro_id) {
       return res.status(400).json({ error: "body_invalido" });
     }

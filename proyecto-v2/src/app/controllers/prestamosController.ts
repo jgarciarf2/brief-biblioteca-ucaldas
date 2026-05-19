@@ -19,6 +19,7 @@ export const createPrestamoController = async (req: Request, res: Response) => {
   try {
     const estudiante_id = req.body?.estudiante_id || req.body?.estudianteId;
     const ejemplar_id = req.body?.ejemplar_id || req.body?.ejemplarId;
+    const fechaPrestamo = req.body?.fechaPrestamo || req.body?.fecha_prestamo;
 
     if (!estudiante_id || !ejemplar_id) {
       return res.status(400).json({ error: "body_invalido" });
@@ -27,6 +28,7 @@ export const createPrestamoController = async (req: Request, res: Response) => {
     const prestamo = await executeCreatePrestamo({
       estudiante_id: String(estudiante_id),
       ejemplar_id: String(ejemplar_id),
+      fechaPrestamo: fechaPrestamo ? String(fechaPrestamo) : undefined,
     });
 
     return res.status(201).json(prestamo);

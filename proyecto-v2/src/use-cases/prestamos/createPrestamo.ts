@@ -82,13 +82,14 @@ const validarEjemplarDisponible = (ejemplar: Ejemplar | null) => {
 export const executeCreatePrestamo = async (input: {
   estudiante_id: string;
   ejemplar_id: string;
+  fechaPrestamo?: string;
 }) => {
   const usuario = await findUsuarioById(input.estudiante_id);
   if (!usuario) {
     throw new AppError("estudiante_no_encontrado", 404);
   }
 
-  const nowIso = toIsoString(new Date());
+  const nowIso = input.fechaPrestamo ? new Date(input.fechaPrestamo).toISOString() : toIsoString(new Date());
   await validarBloqueos(usuario.id, nowIso);
 
   const limite = getLimitePrestamos(usuario.rol);
