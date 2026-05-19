@@ -2,9 +2,14 @@ import express, { Request, Response } from "express";
 import { initDb } from "./db/sqlite";
 import {
   countPrestamosVigentesByLibro,
+  createLibro,
   findLibroById,
   listLibrosWithDisponibles,
 } from "./repositories/libroRepository";
+import {
+  createEstudiante,
+  findEstudianteById,
+} from "./repositories/estudianteRepository";
 import {
   createPrestamo,
   findPrestamoById,
@@ -22,6 +27,8 @@ app.get("/", (_req: Request, res: Response) => {
     nombre: "Biblioteca UCaldas API",
     endpoints: [
       "GET /libros",
+      "POST /libros",
+      "POST /estudiantes",
       "POST /prestamos",
       "POST /prestamos/:id/devolver",
       "GET /prestamos/vigentes",
@@ -32,9 +39,109 @@ app.get("/", (_req: Request, res: Response) => {
 app.get("/libros", async (_req: Request, res: Response) => {
   try {
     const respuesta = await listLibrosWithDisponibles();
-    res.json(respuesta);
+    res.json(
+      respuesta.map((libro) => ({
+        id: libro.id,
+        titulo: libro.titulo,
+        autor: libro.autor,
+        ejemplares: libro.ejemplares,
+        sala: libro.sala,
+        altaDemanda: libro.alta_demanda === 1,
+        disponibles: libro.disponibles,
+      })),
+    );
   } catch (error) {
     res.status(500).json({ error: "internal_error" });
+  }
+});
+
+app.post("/estudiantes", async (req: Request, res: Response) => {
+  try {
+    const { id, nombre, programa, semestre, tipo } = req.body || {};
+
+    if (!id || !nombre || !programa || semestre === undefined || !tipo) {
+      return res.status(400).json({
+        error: "id, nombre, programa, semestre y tipo son obligatorios",
+      });
+    }
+
+    const tipoValue = String(tipo);
+    if (tipoValue !== "pregrado" && tipoValue !== "posgrado") {
+      return res.status(400).json({ error: "tipo invalido" });
+    }
+
+    const semestreNum = Number(semestre);
+    if (Number.isNaN(semestreNum) || semestreNum <= 0) {
+      return res.status(400).json({ error: "semestre invalido" });
+    }
+
+    const existente = await findEstudianteById(String(id));
+    if (existente) {
+      return res.status(409).json({ error: "El estudiante ya existe" });
+    }
+
+    const estudiante = await createEstudiante({
+      id: String(id),
+      nombre: String(nombre),
+      programa: String(programa),
+      semestre: semestreNum,
+      tipo: tipoValue,
+    });
+
+    return res.status(201).json(estudiante);
+  } catch (error) {
+    return res.status(500).json({ error: "internal_error" });
+  }
+});
+
+app.post("/libros", async (req: Request, res: Response) => {
+  try {
+    const { id, titulo, autor, sala, altaDemanda, alta_demanda, ejemplares } =
+      req.body || {};
+
+    if (!id || !titulo || !autor || !sala) {
+      return res.status(400).json({
+        error: "id, titulo, autor y sala son obligatorios",
+      });
+    }
+
+    const idNum = Number(id);
+    if (Number.isNaN(idNum)) {
+      return res.status(400).json({ error: "id invalido" });
+    }
+
+    const altaDemandaRaw = altaDemanda ?? alta_demanda ?? false;
+    const altaDemandaBool = Boolean(altaDemandaRaw);
+
+    const ejemplaresNum = ejemplares === undefined ? 1 : Number(ejemplares);
+    if (Number.isNaN(ejemplaresNum) || ejemplaresNum <= 0) {
+      return res.status(400).json({ error: "ejemplares invalido" });
+    }
+
+    const existente = await findLibroById(idNum);
+    if (existente) {
+      return res.status(409).json({ error: "El libro ya existe" });
+    }
+
+    const libro = await createLibro({
+      id: idNum,
+      titulo: String(titulo),
+      autor: String(autor),
+      sala: String(sala),
+      ejemplares: ejemplaresNum,
+      alta_demanda: altaDemandaBool ? 1 : 0,
+    });
+
+    return res.status(201).json({
+      id: libro.id,
+      titulo: libro.titulo,
+      autor: libro.autor,
+      sala: libro.sala,
+      ejemplares: libro.ejemplares,
+      altaDemanda: libro.alta_demanda === 1,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "internal_error" });
   }
 });
 

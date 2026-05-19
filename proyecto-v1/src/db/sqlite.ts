@@ -39,13 +39,34 @@ const seedLibros = async (
   }
 
   const seed = [
-    { id: 1, titulo: "Ingenieria de Software", autor: "Ian Sommerville", ejemplares: 3 },
-    { id: 2, titulo: "Clean Code", autor: "Robert C. Martin", ejemplares: 2 },
-    { id: 3, titulo: "Estructuras de Datos", autor: "Mark Allen Weiss", ejemplares: 1 },
+    {
+      id: 1,
+      titulo: "Ingenieria de Software",
+      autor: "Ian Sommerville",
+      ejemplares: 3,
+      sala: "Sala General",
+      alta_demanda: 0,
+    },
+    {
+      id: 2,
+      titulo: "Clean Code",
+      autor: "Robert C. Martin",
+      ejemplares: 2,
+      sala: "Sala General",
+      alta_demanda: 0,
+    },
+    {
+      id: 3,
+      titulo: "Estructuras de Datos",
+      autor: "Mark Allen Weiss",
+      ejemplares: 1,
+      sala: "Sala General",
+      alta_demanda: 0,
+    },
   ];
 
   const insertSql =
-    "INSERT INTO libros (id, titulo, autor, ejemplares) VALUES (?, ?, ?, ?)";
+    "INSERT INTO libros (id, titulo, autor, ejemplares, sala, alta_demanda) VALUES (?, ?, ?, ?, ?, ?)";
 
   for (const libro of seed) {
     await db.run(insertSql, [
@@ -53,7 +74,28 @@ const seedLibros = async (
       libro.titulo,
       libro.autor,
       libro.ejemplares,
+      libro.sala,
+      libro.alta_demanda,
     ]);
+  }
+};
+
+const ensureLibroColumns = async (
+  db: Database<sqlite3.Database, sqlite3.Statement>,
+) => {
+  const columns = await db.all<{ name: string }[]>(
+    "PRAGMA table_info(libros)",
+  );
+  const columnNames = new Set(columns.map((column) => column.name));
+
+  if (!columnNames.has("sala")) {
+    await db.exec("ALTER TABLE libros ADD COLUMN sala TEXT");
+  }
+
+  if (!columnNames.has("alta_demanda")) {
+    await db.exec(
+      "ALTER TABLE libros ADD COLUMN alta_demanda INTEGER NOT NULL DEFAULT 0",
+    );
   }
 };
 
@@ -66,7 +108,16 @@ export const initDb = async () => {
       "id INTEGER PRIMARY KEY,",
       "titulo TEXT NOT NULL,",
       "autor TEXT NOT NULL,",
-      "ejemplares INTEGER NOT NULL",
+      "ejemplares INTEGER NOT NULL,",
+      "sala TEXT,",
+      "alta_demanda INTEGER NOT NULL DEFAULT 0",
+      ");",
+      "CREATE TABLE IF NOT EXISTS estudiantes (",
+      "id TEXT PRIMARY KEY,",
+      "nombre TEXT NOT NULL,",
+      "programa TEXT NOT NULL,",
+      "semestre INTEGER NOT NULL,",
+      "tipo TEXT NOT NULL",
       ");",
       "CREATE TABLE IF NOT EXISTS prestamos (",
       "id INTEGER PRIMARY KEY AUTOINCREMENT,",
@@ -79,6 +130,8 @@ export const initDb = async () => {
       ");",
     ].join("\n"),
   );
+
+  await ensureLibroColumns(db);
 
   await seedLibros(db);
 };

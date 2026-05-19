@@ -5,6 +5,8 @@ export type LibroRow = {
   titulo: string;
   autor: string;
   ejemplares: number;
+  sala: string | null;
+  alta_demanda: number;
 };
 
 export type LibroDisponible = LibroRow & { disponibles: number };
@@ -13,7 +15,7 @@ export const listLibrosWithDisponibles = async (): Promise<LibroDisponible[]> =>
   const db = await openDb();
   const rows = await db.all<LibroDisponible>(
     [
-      "SELECT l.id, l.titulo, l.autor, l.ejemplares,",
+      "SELECT l.id, l.titulo, l.autor, l.ejemplares, l.sala, l.alta_demanda,",
       "l.ejemplares - COALESCE(v.cnt, 0) AS disponibles",
       "FROM libros l",
       "LEFT JOIN (",
@@ -35,11 +37,43 @@ export const listLibrosWithDisponibles = async (): Promise<LibroDisponible[]> =>
 export const findLibroById = async (id: number): Promise<LibroRow | null> => {
   const db = await openDb();
   const libro = await db.get<LibroRow>(
-    "SELECT id, titulo, autor, ejemplares FROM libros WHERE id = ?",
+    "SELECT id, titulo, autor, ejemplares, sala, alta_demanda FROM libros WHERE id = ?",
     [id],
   );
 
   return libro ?? null;
+};
+
+export const createLibro = async (data: {
+  id: number;
+  titulo: string;
+  autor: string;
+  ejemplares: number;
+  sala: string | null;
+  alta_demanda: number;
+}): Promise<LibroRow> => {
+  const db = await openDb();
+  await db.run(
+    [
+      "INSERT INTO libros (id, titulo, autor, ejemplares, sala, alta_demanda)",
+      "VALUES (?, ?, ?, ?, ?, ?)",
+    ].join(" "),
+    [
+      data.id,
+      data.titulo,
+      data.autor,
+      data.ejemplares,
+      data.sala,
+      data.alta_demanda,
+    ],
+  );
+
+  const libro = await findLibroById(data.id);
+  if (!libro) {
+    throw new Error("libro_no_creado");
+  }
+
+  return libro;
 };
 
 export const countPrestamosVigentesByLibro = async (
