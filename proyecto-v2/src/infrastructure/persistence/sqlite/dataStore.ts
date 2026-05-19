@@ -7,7 +7,7 @@ async function initializeCounters() {
     value INTEGER NOT NULL
   )`);
 
-  const keys = ["prestamo", "multa", "solicitud"];
+  const keys = ["prestamo", "multa", "solicitud", "estudiante", "libro"];
   for (const key of keys) {
     const row = await get<{ value: number }>(
       "SELECT value FROM counters WHERE key = ?",

@@ -38,9 +38,7 @@ const getLimitePrestamos = (rol: string) => {
 
 const validarBloqueos = async (usuarioId: string, nowIso: string) => {
   const multasRaw = await listMultasByUsuario(usuarioId);
-  const multas = multasRaw.filter(
-    (multa) => multa.estado === "pendiente",
-  );
+  const multas = multasRaw.filter((multa) => multa.estado === "pendiente");
   if (multas.length > 0) {
     throw new AppError("multas_pendientes", 409);
   }
@@ -70,7 +68,6 @@ const contarPrestamosActivos = async (usuarioId: string, nowIso: string) => {
     }
   }
   return count;
-};
 };
 
 const validarEjemplarDisponible = (ejemplar: Ejemplar | null) => {

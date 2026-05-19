@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { executeGetLibroById } from "../../use-cases/libros/getLibroById";
 import { executeListEjemplaresByLibro } from "../../use-cases/libros/listEjemplaresByLibro";
 import { executeListLibros } from "../../use-cases/libros/listLibros";
+import { executeCrearLibro } from "../../use-cases/libros/crearLibro";
 import { AppError } from "../../shared/errors/AppError";
 
 const parseDisponible = (value?: string) => {
@@ -65,6 +66,15 @@ export const listEjemplaresByLibroController = async (
       String(req.params.id),
     );
     return res.json(ejemplares);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+export const crearLibroController = async (req: Request, res: Response) => {
+  try {
+    const libro = await executeCrearLibro(req.body);
+    return res.status(201).json(libro);
   } catch (error) {
     return handleError(res, error);
   }

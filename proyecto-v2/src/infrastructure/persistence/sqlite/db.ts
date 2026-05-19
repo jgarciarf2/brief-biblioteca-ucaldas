@@ -1,8 +1,15 @@
 import sqlite3 from "sqlite3";
 import path from "path";
+import fs from "fs";
 import { seedBaseData } from "./seed";
 
-const DB_PATH = path.resolve(__dirname, "../../../../db/database.db");
+// Asegurar que la carpeta db existe
+const dbDir = path.join(process.cwd(), "db");
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
+const DB_PATH = path.join(dbDir, "database.db");
 
 export const db = new sqlite3.Database(DB_PATH, (err) => {
   if (err) {
@@ -22,7 +29,19 @@ function initializeSchema() {
       autor TEXT NOT NULL,
       sala TEXT NOT NULL,
       tipo_prestamo TEXT NOT NULL,
+      alta_demanda INTEGER NOT NULL DEFAULT 0,
       activo INTEGER NOT NULL
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS estudiantes (
+      id TEXT PRIMARY KEY,
+      codigo_estudiante TEXT NOT NULL UNIQUE,
+      nombre TEXT NOT NULL,
+      correo TEXT NOT NULL UNIQUE,
+      tipo_estudiante TEXT NOT NULL,
+      programa TEXT NOT NULL,
+      facultad TEXT,
+      estado TEXT NOT NULL
     )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS ejemplares (

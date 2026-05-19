@@ -7,5 +7,6 @@ export type Libro = {
   autor: string;
   sala: string;
   tipo_prestamo: TipoPrestamo;
+  altaDemanda: boolean;
   activo: boolean;
 };

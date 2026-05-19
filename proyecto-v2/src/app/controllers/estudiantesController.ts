@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { executeListHistorialPrestamos } from "../../use-cases/estudiantes/listHistorialPrestamos";
 import { executeListMultas } from "../../use-cases/estudiantes/listMultas";
 import { executeListPrestamosActivos } from "../../use-cases/estudiantes/listPrestamosActivos";
+import { executeCrearEstudiante } from "../../use-cases/estudiantes/crearEstudiante";
 import { AppError } from "../../shared/errors/AppError";
 
 const handleError = (res: Response, error: unknown) => {
@@ -53,6 +54,18 @@ export const listMultasController = async (req: Request, res: Response) => {
     const estado = req.query.estado ? String(req.query.estado) : undefined;
     const multas = await executeListMultas(String(req.params.id), estado);
     return res.json(multas);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+export const crearEstudianteController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const estudiante = await executeCrearEstudiante(req.body);
+    return res.status(201).json(estudiante);
   } catch (error) {
     return handleError(res, error);
   }

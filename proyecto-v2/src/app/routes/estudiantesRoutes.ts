@@ -3,6 +3,7 @@ import {
   listHistorialPrestamosController,
   listMultasController,
   listPrestamosActivosController,
+  crearEstudianteController,
 } from "../controllers/estudiantesController";
 
 const router = Router();
@@ -16,5 +17,6 @@ router.get(
   listHistorialPrestamosController,
 );
 router.get("/estudiantes/:id/multas", listMultasController);
+router.post("/estudiantes", crearEstudianteController);
 
 export default router;
