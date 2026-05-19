@@ -1,4 +1,5 @@
 # Plan de Pruebas — Reglas de Negocio
+
 ## Biblioteca UCaldas — Etapa 4
 
 Ejecuta estas pruebas contra **las dos versiones de tu proyecto**: la que generaste con IA y la que construiste manualmente (o el proyecto v1 del análisis). Anota los resultados en la tabla comparativa del final.
@@ -70,7 +71,7 @@ curl -s -X POST $BASE_CON_IA/api/estudiantes \
 
 ```bash
 # Libro normal (plazo 15 dias)
-curl -s -X POST $BASE_CON_IA/api/libros \
+curl -s -X POST $BASE_CON_IA/libros \
   -H "Content-Type: application/json" \
   -d '{
     "id": "LIB-001",
@@ -142,6 +143,7 @@ curl -s -X POST $BASE_CON_IA/api/prestamos \
 ```
 
 **Resultado esperado:**
+
 ```json
 HTTP 409 Conflict
 {
@@ -151,6 +153,7 @@ HTTP 409 Conflict
 ```
 
 **Preguntas para anotar en tu bitacora:**
+
 - ¿Que codigo HTTP devolvio tu version sin IA? ¿Y la con IA?
 - ¿Cual de las dos incluye un mensaje de error legible?
 - ¿El cuerpo de la respuesta identifica por que fallo?
@@ -240,6 +243,7 @@ curl -s -X POST $BASE_CON_IA/api/prestamos \
 **Resultado esperado:** La `fechaDevolucion` debe ser exactamente **3 dias** despues de la fecha actual.
 
 **Verificacion manual:**
+
 ```bash
 # Fecha de hoy
 date +%Y-%m-%d
@@ -264,6 +268,7 @@ Compara el resultado con lo que devolvio la API.
 > **Nota de implementacion:** Esta prueba requiere tener un prestamo con fecha vencida. Dependiendo de como construiste tu API, hay dos formas de lograrlo:
 >
 > **Opcion A** — Si tu API acepta fecha de prestamo en el body:
+>
 > ```bash
 > curl -s -X POST $BASE_CON_IA/api/prestamos \
 >   -H "Content-Type: application/json" \
@@ -332,7 +337,7 @@ curl -s -X PUT $BASE_CON_IA/api/prestamos/ID_DEL_PRESTAMO/devolucion \
 **Resultado esperado:** Si el prestamo vencio hace N dias, el campo de multa en la respuesta debe ser `N * 2000`.
 
 | Dias de retraso | Multa esperada |
-|-----------------|----------------|
+| --------------- | -------------- |
 | 1               | 2.000          |
 | 3               | 6.000          |
 | 7               | 14.000         |
@@ -415,7 +420,7 @@ curl -s $BASE_CON_IA/api/estudiantes/NO-EXISTE-999/historial | jq
 Llena esta tabla con lo que observaste al correr cada prueba en ambas versiones. Pegala en tu `bitacora.md`.
 
 | Prueba                         | Regla | Esperado        | Sin IA — HTTP | Sin IA — body util | Con IA — HTTP | Con IA — body util |
-|--------------------------------|-------|-----------------|---------------|--------------------|---------------|--------------------|
+| ------------------------------ | ----- | --------------- | ------------- | ------------------ | ------------- | ------------------ |
 | RN1-B cuarto prestamo pregrado | RN1   | 409             |               |                    |               |                    |
 | RN2-B sexto prestamo posgrado  | RN2   | 409             |               |                    |               |                    |
 | RN5-B ejemplar ya prestado     | RN5   | 409             |               |                    |               |                    |
