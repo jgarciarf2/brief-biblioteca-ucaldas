@@ -1,14 +1,14 @@
-import { listLibros } from "../../infrastructure/persistence/in-memory/libroRepository";
-import { listEjemplares } from "../../infrastructure/persistence/in-memory/ejemplarRepository";
+import { listLibros } from "../../infrastructure/persistence/sqlite/libroRepository";
+import { listEjemplares } from "../../infrastructure/persistence/sqlite/ejemplarRepository";
 
-export const executeListLibros = (filters: {
+export const executeListLibros = async (filters: {
   titulo?: string;
   autor?: string;
   sala?: string;
   disponible?: boolean;
 }) => {
-  const libros = listLibros();
-  const ejemplares = listEjemplares();
+  const libros = await listLibros();
+  const ejemplares = await listEjemplares();
 
   return libros.filter((libro) => {
     if (

@@ -1,28 +1,29 @@
-import { findLibroById } from "../../infrastructure/persistence/in-memory/libroRepository";
+import { findLibroById } from "../../infrastructure/persistence/sqlite/libroRepository";
 import {
   listSolicitudes,
   addSolicitud,
-} from "../../infrastructure/persistence/in-memory/solicitudEsperaRepository";
-import { findUsuarioById } from "../../infrastructure/persistence/in-memory/usuarioRepository";
-import { nextId } from "../../infrastructure/persistence/in-memory/dataStore";
+} from "../../infrastructure/persistence/sqlite/solicitudEsperaRepository";
+import { findUsuarioById } from "../../infrastructure/persistence/sqlite/usuarioRepository";
+import { nextId } from "../../infrastructure/persistence/sqlite/dataStore";
 import { AppError } from "../../shared/errors/AppError";
 import { toIsoString } from "../../shared/utils/dateUtils";
 
-export const executeCreateSolicitudEspera = (input: {
+export const executeCreateSolicitudEspera = async (input: {
   estudiante_id: string;
   libro_id: string;
 }) => {
-  const usuario = findUsuarioById(input.estudiante_id);
+  const usuario = await findUsuarioById(input.estudiante_id);
   if (!usuario) {
     throw new AppError("estudiante_no_encontrado", 404);
   }
 
-  const libro = findLibroById(input.libro_id);
+  const libro = await findLibroById(input.libro_id);
   if (!libro) {
     throw new AppError("libro_no_encontrado", 404);
   }
 
-  const existing = listSolicitudes().find(
+  const allSolicitudes = await listSolicitudes();
+  const existing = allSolicitudes.find(
     (solicitud) =>
       solicitud.libro_id === libro.id &&
       solicitud.usuario_id === usuario.id &&
@@ -33,15 +34,15 @@ export const executeCreateSolicitudEspera = (input: {
     throw new AppError("solicitud_ya_activa", 409);
   }
 
-  const solicitud = {
-    id: nextId("solicitud"),
+  const solicitud: any = {
+    id: await nextId("solicitud"),
     libro_id: libro.id,
     usuario_id: usuario.id,
     fecha_solicitud: toIsoString(new Date()),
     estado: "activa",
   };
 
-  addSolicitud(solicitud);
+  await addSolicitud(solicitud);
 
   return solicitud;
 };

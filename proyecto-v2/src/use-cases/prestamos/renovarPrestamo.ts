@@ -1,10 +1,10 @@
-import { findEjemplarById } from "../../infrastructure/persistence/in-memory/ejemplarRepository";
-import { findLibroById } from "../../infrastructure/persistence/in-memory/libroRepository";
+import { findEjemplarById } from "../../infrastructure/persistence/sqlite/ejemplarRepository";
+import { findLibroById } from "../../infrastructure/persistence/sqlite/libroRepository";
 import {
   findPrestamoById,
   updatePrestamo,
-} from "../../infrastructure/persistence/in-memory/prestamoRepository";
-import { listSolicitudesByLibro } from "../../infrastructure/persistence/in-memory/solicitudEsperaRepository";
+} from "../../infrastructure/persistence/sqlite/prestamoRepository";
+import { listSolicitudesByLibro } from "../../infrastructure/persistence/sqlite/solicitudEsperaRepository";
 import { AppError } from "../../shared/errors/AppError";
 import { addDays, isOverdue, toIsoString } from "../../shared/utils/dateUtils";
 import { isPrestamoActivo, normalizePrestamo } from "./prestamoHelpers";
@@ -19,14 +19,14 @@ const getPlazoDias = (tipoPrestamo: string) => {
   throw new AppError("tipo_prestamo_invalido", 400);
 };
 
-export const executeRenovarPrestamo = (prestamoId: string) => {
-  const prestamo = findPrestamoById(prestamoId);
+export const executeRenovarPrestamo = async (prestamoId: string) => {
+  const prestamo = await findPrestamoById(prestamoId);
   if (!prestamo) {
     throw new AppError("prestamo_no_encontrado", 404);
   }
 
   const nowIso = toIsoString(new Date());
-  const normalized = normalizePrestamo(prestamo, nowIso);
+  const normalized = await normalizePrestamo(prestamo, nowIso);
 
   if (!isPrestamoActivo(normalized.estado)) {
     throw new AppError("prestamo_no_renovable", 409);
@@ -36,17 +36,18 @@ export const executeRenovarPrestamo = (prestamoId: string) => {
     throw new AppError("prestamo_vencido", 409);
   }
 
-  const ejemplar = findEjemplarById(normalized.ejemplar_id);
+  const ejemplar = await findEjemplarById(normalized.ejemplar_id);
   if (!ejemplar) {
     throw new AppError("ejemplar_no_encontrado", 404);
   }
 
-  const libro = findLibroById(ejemplar.libro_id);
+  const libro = await findLibroById(ejemplar.libro_id);
   if (!libro) {
     throw new AppError("libro_no_encontrado", 404);
   }
 
-  const solicitudesActivas = listSolicitudesByLibro(libro.id).filter(
+  const solicitudesActivasRaw = await listSolicitudesByLibro(libro.id);
+  const solicitudesActivas = solicitudesActivasRaw.filter(
     (solicitud) => solicitud.estado === "activa",
   );
 
@@ -57,14 +58,14 @@ export const executeRenovarPrestamo = (prestamoId: string) => {
   const plazo = getPlazoDias(libro.tipo_prestamo);
   const nuevaFecha = addDays(normalized.fecha_devolucion_esperada, plazo);
 
-  const actualizado = {
+  const actualizado: any = {
     ...normalized,
     fecha_devolucion_esperada: nuevaFecha,
     renovaciones: normalized.renovaciones + 1,
     estado: "renovado",
   };
 
-  updatePrestamo(actualizado);
+  await updatePrestamo(actualizado);
 
   return actualizado;
 };

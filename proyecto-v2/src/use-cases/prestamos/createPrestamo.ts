@@ -3,15 +3,15 @@ import { Prestamo } from "../../domain/entities/Prestamo";
 import {
   findEjemplarById,
   updateEjemplar,
-} from "../../infrastructure/persistence/in-memory/ejemplarRepository";
-import { findLibroById } from "../../infrastructure/persistence/in-memory/libroRepository";
+} from "../../infrastructure/persistence/sqlite/ejemplarRepository";
+import { findLibroById } from "../../infrastructure/persistence/sqlite/libroRepository";
 import {
   addPrestamo,
   listPrestamos,
-} from "../../infrastructure/persistence/in-memory/prestamoRepository";
-import { listMultasByUsuario } from "../../infrastructure/persistence/in-memory/multaRepository";
-import { findUsuarioById } from "../../infrastructure/persistence/in-memory/usuarioRepository";
-import { nextId } from "../../infrastructure/persistence/in-memory/dataStore";
+} from "../../infrastructure/persistence/sqlite/prestamoRepository";
+import { listMultasByUsuario } from "../../infrastructure/persistence/sqlite/multaRepository";
+import { findUsuarioById } from "../../infrastructure/persistence/sqlite/usuarioRepository";
+import { nextId } from "../../infrastructure/persistence/sqlite/dataStore";
 import { AppError } from "../../shared/errors/AppError";
 import { addDays, toIsoString } from "../../shared/utils/dateUtils";
 import { isPrestamoActivo, normalizePrestamo } from "./prestamoHelpers";
@@ -36,35 +36,41 @@ const getLimitePrestamos = (rol: string) => {
   throw new AppError("rol_estudiante_invalido", 400);
 };
 
-const validarBloqueos = (usuarioId: string, nowIso: string) => {
-  const multas = listMultasByUsuario(usuarioId).filter(
+const validarBloqueos = async (usuarioId: string, nowIso: string) => {
+  const multasRaw = await listMultasByUsuario(usuarioId);
+  const multas = multasRaw.filter(
     (multa) => multa.estado === "pendiente",
   );
   if (multas.length > 0) {
     throw new AppError("multas_pendientes", 409);
   }
 
-  const prestamosUsuario = listPrestamos().filter(
+  const prestamosUsuarioRaw = await listPrestamos();
+  const prestamosUsuario = prestamosUsuarioRaw.filter(
     (prestamo) => prestamo.usuario_id === usuarioId,
   );
 
-  const vencidos = prestamosUsuario.some((prestamo) => {
-    const normalized = normalizePrestamo(prestamo, nowIso);
-    return normalized.estado === "vencido";
-  });
-
-  if (vencidos) {
-    throw new AppError("estudiante_con_prestamo_vencido", 409);
+  for (const prestamo of prestamosUsuario) {
+    const normalized = await normalizePrestamo(prestamo, nowIso);
+    if (normalized.estado === "vencido") {
+      throw new AppError("estudiante_con_prestamo_vencido", 409);
+    }
   }
 };
 
-const contarPrestamosActivos = (usuarioId: string, nowIso: string) => {
-  return listPrestamos()
-    .filter((prestamo) => prestamo.usuario_id === usuarioId)
-    .filter((prestamo) => {
-      const normalized = normalizePrestamo(prestamo, nowIso);
-      return isPrestamoActivo(normalized.estado);
-    }).length;
+const contarPrestamosActivos = async (usuarioId: string, nowIso: string) => {
+  const prestamos = await listPrestamos();
+  let count = 0;
+  for (const prestamo of prestamos) {
+    if (prestamo.usuario_id === usuarioId) {
+      const normalized = await normalizePrestamo(prestamo, nowIso);
+      if (isPrestamoActivo(normalized.estado)) {
+        count++;
+      }
+    }
+  }
+  return count;
+};
 };
 
 const validarEjemplarDisponible = (ejemplar: Ejemplar | null) => {
@@ -76,20 +82,20 @@ const validarEjemplarDisponible = (ejemplar: Ejemplar | null) => {
   }
 };
 
-export const executeCreatePrestamo = (input: {
+export const executeCreatePrestamo = async (input: {
   estudiante_id: string;
   ejemplar_id: string;
 }) => {
-  const usuario = findUsuarioById(input.estudiante_id);
+  const usuario = await findUsuarioById(input.estudiante_id);
   if (!usuario) {
     throw new AppError("estudiante_no_encontrado", 404);
   }
 
   const nowIso = toIsoString(new Date());
-  validarBloqueos(usuario.id, nowIso);
+  await validarBloqueos(usuario.id, nowIso);
 
   const limite = getLimitePrestamos(usuario.rol);
-  const actuales = contarPrestamosActivos(usuario.id, nowIso);
+  const actuales = await contarPrestamosActivos(usuario.id, nowIso);
   if (actuales >= limite) {
     throw new AppError("limite_prestamos_alcanzado", 409, {
       limite,
@@ -97,10 +103,10 @@ export const executeCreatePrestamo = (input: {
     });
   }
 
-  const ejemplar = findEjemplarById(input.ejemplar_id);
+  const ejemplar = await findEjemplarById(input.ejemplar_id);
   validarEjemplarDisponible(ejemplar);
 
-  const libro = findLibroById(ejemplar.libro_id);
+  const libro = await findLibroById(ejemplar!.libro_id);
   if (!libro) {
     throw new AppError("libro_no_encontrado", 404);
   }
@@ -109,9 +115,9 @@ export const executeCreatePrestamo = (input: {
   const fechaEsperada = addDays(nowIso, plazo);
 
   const nuevoPrestamo: Prestamo = {
-    id: nextId("prestamo"),
+    id: await nextId("prestamo"),
     usuario_id: usuario.id,
-    ejemplar_id: ejemplar.id,
+    ejemplar_id: ejemplar!.id,
     fecha_prestamo: nowIso,
     fecha_devolucion_esperada: fechaEsperada,
     fecha_devolucion_real: null,
@@ -120,12 +126,12 @@ export const executeCreatePrestamo = (input: {
   };
 
   const ejemplarActualizado: Ejemplar = {
-    ...ejemplar,
+    ...ejemplar!,
     estado: "prestado",
   };
 
-  addPrestamo(nuevoPrestamo);
-  updateEjemplar(ejemplarActualizado);
+  await addPrestamo(nuevoPrestamo);
+  await updateEjemplar(ejemplarActualizado);
 
   return nuevoPrestamo;
 };
