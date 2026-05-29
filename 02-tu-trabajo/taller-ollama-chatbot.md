@@ -49,12 +49,12 @@ Descarga el instalador `.exe` desde [ollama.com/download](https://ollama.com/dow
 
 Ollama sirve modelos localmente. Elige uno según la RAM disponible en tu máquina:
 
-| Modelo              | RAM mínima | Perfil                                             |
-|---------------------|------------|----------------------------------------------------|
-| `llama3.2:1b`       | 2 GB       | Muy liviano, respuestas cortas                     |
-| `llama3.2:3b`       | 4 GB       | Buen balance velocidad / calidad                   |
-| `qwen2.5-coder:7b`  | 8 GB       | Especializado en código, mejor para generar tests  |
-| `mistral:7b`        | 8 GB       | General, bueno para razonamiento                   |
+| Modelo             | RAM mínima | Perfil                                            |
+| ------------------ | ---------- | ------------------------------------------------- |
+| `llama3.2:1b`      | 2 GB       | Muy liviano, respuestas cortas                    |
+| `llama3.2:3b`      | 4 GB       | Buen balance velocidad / calidad                  |
+| `qwen2.5-coder:7b` | 8 GB       | Especializado en código, mejor para generar tests |
+| `mistral:7b`       | 8 GB       | General, bueno para razonamiento                  |
 
 **Recomendado si tienes 8 GB o más:**
 
@@ -182,7 +182,9 @@ async function preguntarAlModelo(mensajeUsuario) {
   });
 
   if (!respuesta.ok) {
-    throw new Error(`Ollama respondió ${respuesta.status}. ¿Está corriendo? Ejecuta: ollama serve`);
+    throw new Error(
+      `Ollama respondió ${respuesta.status}. ¿Está corriendo? Ejecuta: ollama serve`,
+    );
   }
 
   const datos = await respuesta.json();
@@ -198,7 +200,10 @@ function ejecutarCurl(respuestaModelo) {
       const comando = linea.replace("EJECUTAR:", "").trim();
       console.log(`\n[EJECUTANDO]: ${comando}\n`);
       try {
-        const resultado = execSync(comando, { encoding: "utf-8", timeout: 10000 });
+        const resultado = execSync(comando, {
+          encoding: "utf-8",
+          timeout: 10000,
+        });
         console.log("[RESULTADO]:\n" + resultado);
       } catch (err) {
         console.log("[RESULTADO]:\n" + (err.stdout || err.message));
@@ -213,7 +218,7 @@ async function iniciar() {
   console.log("=== Chatbot de Pruebas — Biblioteca UCaldas ===");
   console.log(`Modelo: ${MODELO}`);
   console.log(`Servidor: ${BASE_URL}`);
-  console.log('Escribe tu pregunta. Ejemplos:');
+  console.log("Escribe tu pregunta. Ejemplos:");
   console.log('  "prueba que un pregrado no pueda tener 4 préstamos"');
   console.log('  "ejecuta la prueba RN6 para el plazo de alta demanda"');
   console.log('  "crea datos de prueba para RN1"');
@@ -348,20 +353,24 @@ Al final de esta sesión, agrega una sección a tu `bitacora.md`:
 ## Chatbot Ollama — Registro
 
 ### Modelo usado
+
 - Nombre: qwen2.5-coder:7b (o el que usaste)
 - RAM consumida aproximada: X GB
 
 ### Preguntas útiles que generó el chatbot
+
 | Pregunta que hice | Qué generó el chatbot | ¿Fue útil? |
-|-------------------|-----------------------|------------|
+| ----------------- | --------------------- | ---------- |
 | ...               | ...                   | Sí / No    |
 
 ### Limitaciones observadas
+
 - ¿El chatbot inventó endpoints que no existen?
 - ¿Confundió reglas entre sí?
 - ¿Tuvo que corregirle algo?
 
 ### Comparación: chatbot local vs ChatGPT/Claude en la nube
+
 - ¿Qué diferencias notaste en la calidad de las respuestas?
 - ¿Qué ventajas tiene correrlo localmente?
 ```
@@ -381,7 +390,8 @@ npm install node-fetch
 Y agrega al inicio de `chatbot.js`:
 
 ```js
-const fetch = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
+const fetch = (...args) =>
+  import("node-fetch").then(({ default: f }) => f(...args));
 ```
 
 ### "Error: Ollama respondió 404"
